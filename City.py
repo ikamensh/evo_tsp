@@ -2,7 +2,7 @@ import numpy as np
 import random
 from functools import lru_cache
 
-
+np.random.seed(1)
 class City:
     def __init__(self, ndim):
         self.coordinates = np.random.random(size=[ndim])

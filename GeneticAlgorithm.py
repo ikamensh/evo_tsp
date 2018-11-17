@@ -24,9 +24,9 @@ class GeneticAlgorithm:
 
     def rank(self):
         self.population = sorted(self.population, key=lambda x: x.fitness, reverse=True)
-        self.max = self.population[0].routeDistance()
-        self.min = self.population[-1].routeDistance()
-        self.avg = sum([x.routeDistance() for x in self.population]) / len(self.population)
+        self.max = self.population[0].distance()
+        self.min = self.population[-1].distance()
+        self.avg = sum([x.distance() for x in self.population]) / len(self.population)
 
     def select_parents(self, n, smoothen_chances):
         indexes = np.arange(0, len(self.population), dtype=np.int)

@@ -7,30 +7,41 @@ from borrowed import longest_common_seq
 class RouteUnit:
     def __init__(self, route: List[City]):
         self.route = route
-        self.distance = None
+        self._distance = None
         self._fitness = 0.0
 
-    def routeDistance(self):
-        if self.distance is None:
-            pathDistance = 0
-            for i in range(0, len(self.route)):
-                fromCity = self.route[i]
-                if i + 1 < len(self.route):
-                    toCity = self.route[i + 1]
-                else:
-                    toCity = self.route[0]
-                pathDistance += fromCity.distance(toCity)
-            self.distance = pathDistance
-        return self.distance
+    def distance(self):
+        if self._distance is None:
+            self._distance = self.route_distance(self.route)
+        return self._distance
+
+    @staticmethod
+    def route_distance(route):
+        pathDistance = 0
+        for i in range(0, len(route)):
+            fromCity = route[i]
+            if i + 1 < len(route):
+                toCity = route[i + 1]
+            else:
+                toCity = route[0]
+            pathDistance += fromCity.distance(toCity)
+        return pathDistance
 
     @property
     def fitness(self):
         if self._fitness == 0:
-            self._fitness = 1 / float(self.routeDistance())
+            self._fitness = 1 / float(self.distance())
         return self._fitness
 
     @staticmethod
     def crossover(parent1: RouteUnit, parent2: RouteUnit) -> RouteUnit:
+        """
+        Create a child which will have a random subsequence from parent1,
+        and the rest of the sequence from parent2. The sequence from parent2 will have the
+        :param parent1:
+        :param parent2:
+        :return:
+        """
 
         routeA = parent1.route
         routeB = parent2.route
