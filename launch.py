@@ -4,10 +4,13 @@ import matplotlib.pyplot as plt
 import random
 import os
 
+from siman.visualize_sa import plotTSP
+
+
 from collections import namedtuple
 episode = namedtuple("episode", "generation min avg max similarity longest_common")
 
-cities = [City(ndim=5) for i in range(60)]
+cities = [City(ndim=2) for i in range(60)]
 
 
 def one_run(popsize, epochs, elite_size, mutation_rate):
@@ -15,12 +18,13 @@ def one_run(popsize, epochs, elite_size, mutation_rate):
 
     history = []
     for i in range(epochs):
-        # if i % 50 == 0:
-        #     print("generation", i)
+        if i % 500 == 0:
+            print("generation", i)
+            print(i, ga.min, ga.avg, ga.max, ga.ra_percentage_common, ga.ra_longest_subseq)
         history.append(episode(i, ga.min, ga.avg, ga.max, ga.ra_percentage_common, ga.ra_longest_subseq))
         ga.step(elite_size, mutation_rate)
 
-    folder = f"plots/cities_{len(cities)}_dim{len(cities[0].coordinates)}/{popsize}_{elite_size}_{mutation_rate} --- {ga.min:.3f}"
+    folder = f"plots/cities_{len(cities)}_dim{len(cities[0].coordinates)}/{popsize}_{elite_size}_{mutation_rate} --- {ga.max:.3f}"
     print(folder, epochs)
     try:
         os.makedirs(folder)
@@ -47,6 +51,10 @@ def one_run(popsize, epochs, elite_size, mutation_rate):
     plt.grid()
     plt.savefig(os.path.join(folder, "similarity.png"))
 
+    plotTSP( [ga.population[0].route] , save_to=os.path.join(folder, "best_route.png"))
+
+    return ga.population[0]
+
     # lc = [e.longest_common for e in history]
     #
     # plt.clf()
@@ -55,16 +63,23 @@ def one_run(popsize, epochs, elite_size, mutation_rate):
     # plt.xlabel('Generation')
     # plt.grid()
     # plt.savefig(os.path.join(folder, "longest_common.png"))
-import time
-t = time.time()
-for popsize in [10, 30, 100, 300]:
-    for mutation_rate in [5e-3, 1e-3, 1e-2]:
-        one_run(popsize, int( 5e5 // popsize), min(popsize//4,15) + popsize//25, mutation_rate)
-        print(time.time()-t)
-        t = time.time()
+
+# import time
+# t = time.time()
+# for popsize in [10, 30, 100, 300]:
+#     for mutation_rate in [5e-5, 1e-4, 5e-4]:
+#         one_run(popsize,
+#                 epochs=int( 5e4 // popsize),
+#                 elite_size=min(popsize//4,15) + popsize//25,
+#                 mutation_rate= mutation_rate)
+#         print(time.time()-t)
+#         t = time.time()
         # one_run(popsize, int( (1000000/popsize)**0.9 ), min(popsize//4,15) + popsize//25, mutation_rate)
 
-
+one_run(50,
+        epochs=50000,
+        elite_size=10,
+        mutation_rate= 1e-4)
 
 
 
