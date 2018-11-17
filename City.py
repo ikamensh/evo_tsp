@@ -1,15 +1,15 @@
-import math
+import numpy as np
+import random
+from functools import lru_cache
+
 
 class City:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    def __init__(self, ndim):
+        self.coordinates = np.random.random(size=[ndim])
 
+    @lru_cache(maxsize=int(2**20))
     def distance(self, city):
-        xDis = abs(self.x - city.x)
-        yDis = abs(self.y - city.y)
-        distance = math.hypot(xDis,yDis)
-        return distance
+        return np.linalg.norm(self.coordinates - city.coordinates)
 
     def __repr__(self):
-        return "(" + str(self.x) + "," + str(self.y) + ")"
+        return  f"City at {str(self.coordinates)}"
