@@ -19,6 +19,7 @@ def plotTSP(paths: List[List[City]], num_iters=1, save_to=None):
         x.append(city.coordinates[0])
         y.append(city.coordinates[1])
 
+    plt.clf()
     plt.plot(x, y, 'co')
 
     # Set a scale for the arrow heads (there should be a reasonable default for this, WTF?)
@@ -44,14 +45,12 @@ def plotTSP(paths: List[List[City]], num_iters=1, save_to=None):
                         head_width = a_scale, color = 'r', length_includes_head = True,
                         ls = 'dashed', width = 0.001/float(num_iters))
 
-    # Draw the primary path for the TSP problem
     plt.arrow(x[-1], y[-1], (x[0] - x[-1]), (y[0] - y[-1]), head_width = a_scale,
             color ='g', length_includes_head=True)
     for i in range(0,len(x)-1):
         plt.arrow(x[i], y[i], (x[i+1] - x[i]), (y[i+1] - y[i]), head_width = a_scale,
                 color = 'g', length_includes_head = True)
 
-    #Set axis too slitghtly larger than the set of x and y
     plt.xlim(min(x)*1.1, max(x)*1.1)
     plt.ylim(min(y)*1.1, max(y)*1.1)
     if save_to:

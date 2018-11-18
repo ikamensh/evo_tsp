@@ -8,16 +8,16 @@ from RouteUnit import RouteUnit
 
 
 class SimAnneal:
-    def __init__(self, cities: List[City], T=-1, alpha=-1, stopping_T=-1, stopping_iter=-1):
+    def __init__(self, cities: List[City], T=-1, alpha=0.999, stopping_T=1e-8, stopping_iter=100000, initial_solution = None):
         self.cities = cities
         self.N = len(cities)
         self.T = math.sqrt(self.N) if T == -1 else T
-        self.alpha = 0.995 if alpha == -1 else alpha
-        self.stopping_temperature = 0.00000001 if stopping_T == -1 else stopping_T
-        self.stopping_iter = 100000 if stopping_iter == -1 else stopping_iter
+        self.alpha = alpha
+        self.stopping_temperature = stopping_T
+        self.stopping_iter = stopping_iter
         self.iteration = 1
 
-        self.cur_solution = self.initial_solution()
+        self.cur_solution = initial_solution or self.initial_solution()
         self.best_solution = list(self.cur_solution) # make copy
 
         self.cur_fitness = RouteUnit.route_distance(self.cur_solution)
@@ -68,6 +68,9 @@ class SimAnneal:
             if random.random() < self.p_accept(candidate_fitness):
                 self.cur_fitness = candidate_fitness
                 self.cur_solution = candidate
+            else:
+                self.cur_fitness = self.best_fitness
+                self.cur_solution = self.best_solution
 
     def anneal(self):
         """
@@ -75,12 +78,14 @@ class SimAnneal:
         """
         while self.T >= self.stopping_temperature and self.iteration < self.stopping_iter:
             candidate = list(self.cur_solution)
-            l = random.randint(2, self.N - 1)
-            i = random.randint(0, self.N - l)
-            candidate[i:(i + l)] = reversed(candidate[i:(i + l)])
+            length = random.randint(2, self.N - 1)
+            index = random.randint(0, self.N - length)
+            candidate[index:(index + length)] = reversed(candidate[index:(index + length)])
             self.accept(candidate)
             self.T *= self.alpha
             self.iteration += 1
+            if self.iteration % 5000 == 0:
+                print(self.iteration)
 
             self.fitness_list.append(self.cur_fitness)
 
