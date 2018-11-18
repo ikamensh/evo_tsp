@@ -43,10 +43,23 @@ class GeneticAlgorithm:
         children = []
 
         for i in range(n):
-            child = RouteUnit.crossover(parents[i], parents[len(parents) - i - 1])
+            parent_1 = parents[i]
+            parent_2 = parents[len(parents) - i - 1]
+            child = RouteUnit.crossover(parent_1, parent_2)
             children.append(child)
 
         return children
+
+    @staticmethod
+    def offspring_selection(parent_1: RouteUnit, parent_2: RouteUnit, child: RouteUnit, pressure_coef):
+        best_parent_fitness = max(parent_1.fitness, parent_2.fitness)
+        worst_parent_fitness = min(parent_1.fitness, parent_2.fitness)
+
+        threshold = best_parent_fitness * pressure_coef + (1-pressure_coef) * worst_parent_fitness
+
+        return child.fitness > threshold
+
+
 
 
     def step(self, eliteSize, mutationRate):
