@@ -61,15 +61,23 @@ class RouteUnit:
 
     def mutate(self, mutationRate):
 
-        for swapped in range(len(self.route)):
-            if random.random() < mutationRate:
-                swapWith = int(random.random() * len(self.route))
+        # if random.random() < 0.5:
+        #     self.mutate_2()
+        # else:
+            for swapped in range(len(self.route)):
+                if random.random() < mutationRate:
+                    swapWith = int(random.random() * len(self.route))
 
-                city1 = self.route[swapped]
-                city2 = self.route[swapWith]
+                    city1 = self.route[swapped]
+                    city2 = self.route[swapWith]
 
-                self.route[swapped] = city2
-                self.route[swapWith] = city1
+                    self.route[swapped] = city2
+                    self.route[swapWith] = city1
+
+    def mutate_2(self):
+        length = random.randint(2, len(self.route) - 1)
+        index = random.randint(0, len(self.route) - length)
+        self.route[index:(index + length)] = reversed(self.route[index:(index + length)])
 
     @staticmethod
     def createRoute(cityList: List[City]) -> RouteUnit:
