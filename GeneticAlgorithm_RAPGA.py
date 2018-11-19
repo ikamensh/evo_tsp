@@ -44,8 +44,8 @@ class GeneticAlgorithmRapga:
         # self.min_success_ratio = 0.3
         # self.max_success_ratio = 0.8
 
-        self.min_selective_pressure = 0.5
-        self.max_selective_pressure = 0.95
+        self.min_selective_pressure = 0
+        self.max_selective_pressure = 1
 
 
         self.tries_history = deque([1],maxlen=25)

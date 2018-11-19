@@ -10,7 +10,7 @@ if __name__ == "__main__":
     for amt in amounts:
         for d in n_dims:
             cities = [City(ndim=d) for _ in range(amt)]
-            run_all(cities, 1)
+            run_all(cities, 300)
 
-            sgs = Sasegasa(cities, n_villages=2, size_per_village=10, epochs_per_step=2)
+            sgs = Sasegasa(cities, n_villages=6, size_per_village=500, epochs_per_step=70)
             sgs.run()
