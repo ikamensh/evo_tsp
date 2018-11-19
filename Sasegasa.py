@@ -45,7 +45,7 @@ class Sasegasa:
 
         size = len(population)
 
-        populations = [population[i:i+size] for i in range(self.n_villages)]
+        populations = [population[i*size : i*size + size] for i in range(self.n_villages)]
         homeless = population[size*self.n_villages:]
         assert len(homeless) < len(populations)
         for i, unit in enumerate(homeless):
