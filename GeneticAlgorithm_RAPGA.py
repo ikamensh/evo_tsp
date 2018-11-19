@@ -4,8 +4,8 @@ from City import City
 import numpy as np
 from typing import List
 import os
-from utils.plotting import plot_many, my_plot
-from utils.draw_route import plot_route
+from ga_utils.ploting import plot_many, my_plot
+from ga_utils.draw_route import plot_route
 
 from collections import deque
 

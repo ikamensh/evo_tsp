@@ -4,10 +4,9 @@ import datetime
 from concurrent import futures
 import traceback
 
+N_CPU = 4
 
 def run_in_sep_process(ga: GeneticAlgorithmRapga):
-    for route in ga.population:
-        print(len(route.route))
     ga.run()
     ga.document()
     return ga.population
@@ -26,7 +25,7 @@ class Sasegasa:
 
     def set_tags(self):
         for v in self.villages:
-            v.tag = f"SASEGASA/run_{self.uid}_{self.n_villages}"
+            v.tag = f"SASEGASA/run_{self.uid}/{self.n_villages}"
 
     def run(self):
         while self.n_villages > 1:
@@ -46,7 +45,7 @@ class Sasegasa:
 
         population = []
 
-        with futures.ProcessPoolExecutor(2) as executor:
+        with futures.ProcessPoolExecutor(N_CPU) as executor:
 
             to_do = []
             for ga in self.villages:
