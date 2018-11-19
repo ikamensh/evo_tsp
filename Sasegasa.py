@@ -1,5 +1,5 @@
 from GeneticAlgorithm_RAPGA import GeneticAlgorithmRapga
-
+import random
 
 class Sasegasa:
 
@@ -10,12 +10,52 @@ class Sasegasa:
 
         make_random_village = lambda : GeneticAlgorithmRapga.with_random_population(size_per_village, cities, epochs_per_step)
         self.villages = [make_random_village() for _ in range(n_villages) ]
+        self.uid = random.randint(0,5000)
+        self.set_tags()
 
-    def redistribute(self):
+    def set_tags(self):
+        for v in self.villages:
+            v.tag = f"SASEGASA/run_{self.uid}_{self.n_villages}"
 
+    def run(self):
+        while self.n_villages > 1:
+            self.step()
+        last_village = self.villages[0]
+        last_village.run()
+        last_village.document()
+
+        return last_village
+
+    def step(self):
+        for ga in self.villages:
+            ga.run()
+            ga.document()
+        pop = []
+        for ga in self.villages:
+            pop += ga.population
+        self.redistribute(pop)
+        self.set_tags()
+
+    def redistribute(self, _population):
+
+        population = list(_population)
         self.n_villages -= 1
-        total_population = sum([ga.population for ga in self.villages])
-        size = len(total_population)
+        random.shuffle(population)
 
-        populations = [total_population[i:i+size]]
-        new_villages =
+        size = len(population)
+
+        populations = [population[i:i+size] for i in range(self.n_villages)]
+        homeless = population[size*self.n_villages:]
+        assert len(homeless) < len(populations)
+        for i, unit in enumerate(homeless):
+            populations[i].append(unit)
+
+        create_village = lambda pop: GeneticAlgorithmRapga(pop,
+                                                           maxpop=self.size_per_village,
+                                                           planned_epochs=self.epochs_per_step)
+
+        new_villages = [create_village(pop) for pop in populations]
+        self.villages = new_villages
+
+
+

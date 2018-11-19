@@ -3,7 +3,7 @@ from GeneticAlgorithm_RAPGA import GeneticAlgorithmRapga
 import matplotlib.pyplot as plt
 import os
 
-from siman.visualize_sa import plot_route
+from utils.draw_route import plot_route
 
 from siman.launch_sa import annealed_solution
 

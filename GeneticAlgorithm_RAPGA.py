@@ -3,6 +3,9 @@ from RouteUnit import RouteUnit
 from City import City
 import numpy as np
 from typing import List
+import os
+from utils.plotting import plot_many, my_plot
+from utils.draw_route import plot_route
 
 from collections import deque
 
@@ -11,14 +14,18 @@ episode = namedtuple("episode", "generation min avg max similarity longest_commo
 
 class GeneticAlgorithmRapga:
 
-    def __init__(self, initial_population: List[RouteUnit], planned_epochs = 100, elite_size = None, mutation_rate = None):
+    def __init__(self, initial_population: List[RouteUnit],*, maxpop, planned_epochs = 100, elite_size = None, mutation_rate = None):
+
+        self.cities = len(initial_population[0].route)
 
         self.population = initial_population
         self.min_size = 5
-        self.max_size = len(initial_population)
+        self.max_size = maxpop
 
         self.elite_size = elite_size or 1
-        self.mutation_rate = mutation_rate or 2 / len(self.population[0].route)
+        self.mutation_rate = mutation_rate or 1 / self.cities
+
+        self.tag = "no_tag"
 
 
         self.max = None
@@ -51,7 +58,8 @@ class GeneticAlgorithmRapga:
         population = []
         for i in range(popsize):
             population.append(RouteUnit.createRoute(city_list))
-        return GeneticAlgorithmRapga(population, planned_epochs, elite_size, mutation_rate)
+        return GeneticAlgorithmRapga(population, maxpop=len(population), planned_epochs=planned_epochs,
+                                     elite_size=elite_size, mutation_rate=mutation_rate)
 
 
     # success ratio is the portion of population which must be filled with successful offspring
@@ -78,14 +86,14 @@ class GeneticAlgorithmRapga:
     # choose individuals to become parents according to their fitnesses (ranked selection)
     def select_parents(self, n, smoothen_chances):
         indexes = np.arange(0, len(self.population), dtype=np.int)
-        chances = np.arange(len(self.population), 0, -1, dtype=np.int) + smoothen_chances / (1 - smoothen_chances + 1e-9)
+        chances = np.arange(len(self.population), 0, -1, dtype=np.int) + len(self.population) * smoothen_chances / (1 - smoothen_chances + 1e-9)
         chances = chances / sum(chances)
         parent_indexes = np.random.choice(indexes, n, True, chances)
         parents = np.array(self.population)[parent_indexes]
 
         return parents
 
-    def breed_os(self, n, *, elite, mutation_rate, smoothen_chances = 0.8) -> List[RouteUnit]:
+    def breed_os(self, n, *, elite, mutation_rate, smoothen_chances = 0.5) -> List[RouteUnit]:
         """
         Breed new generation with Offspring selection.
 
@@ -188,6 +196,27 @@ class GeneticAlgorithmRapga:
 
         self.hist_similarity.append(percentage_common)
         self.hist_longest_subseq.append(avg_longest_subseq)
+
+    def document(self):
+        history = self.history
+
+        folder = f"plots/cities_{self.cities}_dim{len(self.population[0].route[0].coordinates)}" \
+                 f"/{self.tag}/{self.max_size}_{self.elite_size}_{self.mutation_rate} --- {self.max:.3f}"
+        print(folder, self.epoch)
+        try:
+            os.makedirs(folder)
+        except:
+            pass
+
+        avg = [e.avg for e in history]
+        maxi = [e.max for e in history]
+        plot_many("Distance", folder, avg, maxi)
+
+        my_plot([e.similarity for e in history], "similarity", folder)
+        my_plot([e.sel_pressure for e in history], "Selective Pressure", folder)
+        my_plot([e.popsize for e in history], "Population Size", folder)
+
+        plot_route([self.population[0].route], save_to=os.path.join(folder, "best_route.png"))
 
 
 

@@ -1,10 +1,9 @@
 from City import cities
 from GeneticAlgorithm_OS import GeneticAlgorithm
 import matplotlib.pyplot as plt
-import random
 import os
 
-from siman.visualize_sa import plot_route
+from utils.draw_route import plot_route
 
 
 from collections import namedtuple
@@ -74,8 +73,6 @@ def one_run(popsize, epochs, elite_size, mutation_rate):
     # plt.xlabel('Generation')
     # plt.grid()
     # plt.savefig(os.path.join(folder, "longest_common.png"))
-
-from cProfile import Profile
 
 
 from cProfile import Profile

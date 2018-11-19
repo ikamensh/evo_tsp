@@ -1,6 +1,6 @@
 import math
 import random
-from siman.visualize_sa import plot_route
+from utils.draw_route import plot_route
 import matplotlib.pyplot as plt
 from typing import List
 from City import City

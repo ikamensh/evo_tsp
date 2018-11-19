@@ -1,9 +1,4 @@
-from City import cities
 from GeneticAlgorithm_RAPGA import GeneticAlgorithmRapga
-import matplotlib.pyplot as plt
-import os
-
-from siman.visualize_sa import plot_route
 
 from siman.launch_sa import annealed_solution
 
@@ -12,73 +7,20 @@ from collections import namedtuple
 episode = namedtuple("episode", "generation min avg max similarity longest_common sel_pressure popsize")
 
 
-def my_plot(array, name, folder):
-    plt.clf()
-    plt.plot(array)
-    plt.ylabel(name)
-    plt.xlabel('Generation')
-    plt.grid()
-    plt.savefig(os.path.join(folder, name+".png"))
 
-def plot_many(name, folder, *args):
-    plt.clf()
-    for array in args:
-        plt.plot(array)
-    plt.ylabel(name)
-    plt.xlabel('Generation')
-    plt.grid()
-    plt.savefig(os.path.join(folder, name + ".png"))
 
 
 def one_run(popsize, epochs, elite_size, mutation_rate):
 
     annealed = [annealed_solution() for i in range(popsize//2)]
-    ga = GeneticAlgorithmRapga(annealed, epochs, elite_size, mutation_rate)
+    ga = GeneticAlgorithmRapga(annealed, maxpop=1000,
+                               planned_epochs=epochs, elite_size=elite_size, mutation_rate=mutation_rate)
 
     # max_injections = 20
     # injections = 0
 
-    history = []
-    try:
-        for i in range(epochs):
-            if i % 30 == 0:
-                print("generation", i)
-                print(i, ga.min, ga.avg, ga.max, ga.ra_percentage_common, len(ga.population))
-            history.append(episode(i, ga.min, ga.avg, ga.max, ga.ra_percentage_common, ga.ra_longest_subseq, ga.ra_offspr_selection_tries, len(ga.population)))
-            ga.step(elite_size, mutation_rate)
+    ga.run()
 
-            # if injections < max_injections and ga.ra_offspr_selection_tries > ga.max_tries / 4:
-            #     ga.population.append( annealed_solution() )
-            #     ga.rank()
-            #     injections += 1
-
-    except StopIteration:
-        print("Terminated due to maximum selective pressure")
-
-    folder = f"plots/RAPGA_No_elite/cities_{len(cities)}_dim{len(cities[0].coordinates)}/{popsize}_{elite_size}_{mutation_rate} --- {ga.max:.3f}"
-    print(folder, epochs)
-    try:
-        os.makedirs(folder)
-    except:
-        pass
-
-    avg = [e.avg for e in history]
-    maxi = [e.max for e in history]
-    plot_many("Distance", folder, avg, maxi)
-
-    # plt.clf()
-    # plt.plot(avg, color="blue")
-    # plt.plot(maxi, color="black")
-    # plt.ylabel('Distance')
-    # plt.xlabel('Generation')
-    # plt.grid()
-    # plt.savefig(os.path.join(folder, "distances.png"))
-
-    my_plot([e.similarity for e in history], "similarity", folder)
-    my_plot([e.sel_pressure for e in history], "Selective Pressure", folder)
-    my_plot([e.popsize for e in history], "Population Size", folder)
-
-    plot_route([ga.population[0].route], save_to=os.path.join(folder, "best_route.png"))
 
     return ga.population[0]
 

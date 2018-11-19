@@ -1,5 +1,5 @@
 from RouteUnit import RouteUnit
-from siman.visualize_sa import plot_route
+from utils.draw_route import plot_route
 
 from City import cities
 
@@ -26,7 +26,6 @@ def hill_climb(route: RouteUnit) -> Tuple[RouteUnit, bool]:
     print(f'Calculated new distance {distance}')
     return min_route, not found_better
 
-from siman.launch_sa import sa
 
 # route = RouteUnit(sa.cur_solution)
 route = RouteUnit.createRoute(cities)

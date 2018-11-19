@@ -1,7 +1,7 @@
 import time
 import random
 from RouteUnit import RouteUnit
-from siman.visualize_sa import plot_route
+from utils.draw_route import plot_route
 
 from City import cities
 
