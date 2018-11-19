@@ -1,5 +1,6 @@
 from GeneticAlgorithm_RAPGA import GeneticAlgorithmRapga
 import random
+import datetime
 
 class Sasegasa:
 
@@ -10,7 +11,7 @@ class Sasegasa:
 
         make_random_village = lambda : GeneticAlgorithmRapga.with_random_population(size_per_village, cities, epochs_per_step)
         self.villages = [make_random_village() for _ in range(n_villages) ]
-        self.uid = random.randint(0,5000)
+        self.uid = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
         self.set_tags()
 
     def set_tags(self):
