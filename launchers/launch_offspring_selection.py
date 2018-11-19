@@ -1,4 +1,4 @@
-from City import City
+from City import cities
 from GeneticAlgorithm_OS import GeneticAlgorithm
 import matplotlib.pyplot as plt
 import random
@@ -10,7 +10,7 @@ from siman.visualize_sa import plotTSP
 from collections import namedtuple
 episode = namedtuple("episode", "generation min avg max similarity longest_common sel_pressure")
 
-cities = [City(ndim=2) for i in range(60)]
+
 
 
 def one_run(popsize, epochs, elite_size, mutation_rate):
@@ -75,16 +75,28 @@ def one_run(popsize, epochs, elite_size, mutation_rate):
     # plt.grid()
     # plt.savefig(os.path.join(folder, "longest_common.png"))
 
-import time
-t = time.time()
-for popsize in [10, 30, 80]:
-    for mutation_rate in [5e-3, 8e-3, 2e-2]:
-        one_run(popsize,
-                epochs=int( 1e6 // popsize),
-                elite_size=min(popsize//4,15) + popsize//25,
-                mutation_rate= mutation_rate)
-        print(time.time()-t)
-        t = time.time()
+from cProfile import Profile
+
+
+from cProfile import Profile
+profiler = Profile()
+profiler.runcall(one_run, popsize=10,
+                epochs=int( 5e3 ),
+                elite_size=2,
+                mutation_rate= 8e-3)
+
+profiler.print_stats('cumulative')
+
+# import time
+# t = time.time()
+# for popsize in [10, 30, 80]:
+#     for mutation_rate in [5e-3, 8e-3, 2e-2]:
+#         one_run(popsize=popsize,
+#                 epochs=int( 1e6 // popsize),
+#                 elite_size=min(popsize//4,15) + popsize//25,
+#                 mutation_rate= mutation_rate)
+#         print(time.time()-t)
+#         t = time.time()
 
 # one_run(50,
 #         epochs=50000,

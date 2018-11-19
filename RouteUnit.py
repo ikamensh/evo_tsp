@@ -6,7 +6,7 @@ from borrowed import longest_common_seq
 
 class RouteUnit:
     def __init__(self, route: List[City]):
-        self.route = route
+        self.route = list(route)
         self._distance = None
         self._fitness = 0.0
 
@@ -14,6 +14,7 @@ class RouteUnit:
         if self._distance is None:
             self._distance = self.route_distance(self.route)
         return self._distance
+
 
     @staticmethod
     def route_distance(route):
@@ -110,5 +111,21 @@ class RouteUnit:
 
         return seqs
 
+    def __eq__(self, other:RouteUnit):
+        assert len(self.route) == len(other.route)
+        if self.percent_common(self, other) == 1:
+            return True
+        else:
+            return False
+
+
+    def __hash__(self):
+        total = 0
+        for i in range(len(self.route)-1):
+            city_from = self.route[i]
+            city_to = self.route[i+1]
+            total += hash( (city_from, city_to) )
+        total += hash( (self.route[-1], self.route[0]) )
+        return hash(total)
 
 
