@@ -1,6 +1,5 @@
 import math
 import random
-from utils.draw_route import plot_route
 import matplotlib.pyplot as plt
 from typing import List
 from City import City
@@ -93,11 +92,6 @@ class SimAnneal:
         print('Improvement over greedy heuristic: ',
               round((self.initial_fitness - self.best_fitness) / (self.initial_fitness), 4))
 
-    def visualize_routes(self):
-        """
-        Visualize the TSP route with matplotlib
-        """
-        plot_route([self.best_solution])
 
     def plot_learning(self):
         """

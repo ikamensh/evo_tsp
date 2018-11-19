@@ -24,6 +24,3 @@ class City:
     def __repr__(self):
         return  f"City at {str(self.coordinates)}"
 
-
-
-cities = [City(ndim=2) for i in range(60)]

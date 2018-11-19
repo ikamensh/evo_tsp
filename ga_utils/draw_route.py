@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
-from City import City
+from RouteUnit import RouteUnit
 from typing import List
+import os
 
 
-def plot_route(paths: List[List[City]], num_iters=1, save_to=None):
+def plot_route(paths: List[RouteUnit], num_iters=1, save_to=None):
 
     """
     path: List of lists with the different orders in which the nodes are visited
@@ -15,12 +16,13 @@ def plot_route(paths: List[List[City]], num_iters=1, save_to=None):
     # coordinates
 
     x = []; y = []
-    for city in paths[0]:
+    for city in paths[0].route:
         x.append(city.coordinates[0])
         y.append(city.coordinates[1])
 
     plt.clf()
     plt.plot(x, y, 'co')
+    plt.title = str(paths[0].fitness)
 
     # Set a scale for the arrow heads (there should be a reasonable default for this, WTF?)
     a_scale = float(max(x))/float(100)
@@ -31,8 +33,8 @@ def plot_route(paths: List[List[City]], num_iters=1, save_to=None):
         for i in range(1, num_iters):
 
             # Transform the old paths into a list of coordinates
-            xi = []; yi = [];
-            for city in paths[i]:
+            xi = []; yi = []
+            for city in paths[i].route:
                 xi.append(city.coordinates[0])
                 yi.append(city.coordinates[1])
 
@@ -54,6 +56,12 @@ def plot_route(paths: List[List[City]], num_iters=1, save_to=None):
     plt.xlim(min(x)*1.1, max(x)*1.1)
     plt.ylim(min(y)*1.1, max(y)*1.1)
     if save_to:
-        plt.savefig(save_to)
+        folder, name = save_to
+        try:
+            os.makedirs(folder)
+        except:
+            pass
+
+        plt.savefig( os.path.join(folder, name) )
     else:
         plt.show()

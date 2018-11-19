@@ -1,13 +1,8 @@
 from RouteUnit import RouteUnit
-from utils.draw_route import plot_route
-
-from City import cities
-
 from typing import Tuple
 
-def hill_climb(route: RouteUnit) -> Tuple[RouteUnit, bool]:
+def _hill_climb(route: RouteUnit) -> Tuple[RouteUnit, bool]:
     distance = route.distance()
-    print(f'Starting hillclimb with distance {distance}')
     min_route = route
     found_better = False
 
@@ -19,21 +14,24 @@ def hill_climb(route: RouteUnit) -> Tuple[RouteUnit, bool]:
                 new_route.route[col] = city_a
                 new_distance = new_route.distance()
                 if new_distance < distance:
-                    min_route = new_route
-                    distance = new_distance
-                    found_better = True
+                    return new_route, True
 
-    print(f'Calculated new distance {distance}')
     return min_route, not found_better
 
+import time
 
-# route = RouteUnit(sa.cur_solution)
-route = RouteUnit.createRoute(cities)
-done = False
-while not done:
-    route, done = hill_climb(route)
+def run_hillclimb(cities, time_limit) -> RouteUnit:
 
-plot_route([route.route], save_to=f"hill_climb_{route.distance():.4f}.png")
+    t = time.time()
+
+    done = False
+    route = RouteUnit.createRoute(cities)
+
+    while time.time() - t > time_limit and not done:
+        route, done = _hill_climb(route)
+
+    return route
+
 
 
 

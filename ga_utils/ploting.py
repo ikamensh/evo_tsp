@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import os
 
+problem_tag = lambda cities: f"cities_{len(cities)}_dim{len(cities[0].coordinates)}"
+
 def my_plot(array, name, folder):
     plt.clf()
     plt.plot(array)

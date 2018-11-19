@@ -1,11 +1,14 @@
 from Sasegasa import Sasegasa
-from City import cities
+from City import City
 from time import time
 
 if __name__ == "__main__":
+
+    cities = [City(ndim=2) for _ in range(60)]
+
     t = time()
 
-    sgs = Sasegasa(cities, n_villages=10, size_per_village=500, epochs_per_step=70)
+    sgs = Sasegasa(cities, n_villages=3, size_per_village=50, epochs_per_step=2)
     sgs.run()
 
     print("It took that many seconds: ",time() - t)

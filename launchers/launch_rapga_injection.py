@@ -5,7 +5,7 @@ import os
 
 from utils.draw_route import plot_route
 
-from siman.launch_sa import annealed_solution
+from classical.sim_anneal import annealed_solution
 
 
 from collections import namedtuple

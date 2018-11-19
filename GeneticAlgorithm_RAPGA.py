@@ -4,7 +4,7 @@ from City import City
 import numpy as np
 from typing import List
 import os
-from ga_utils.ploting import plot_many, my_plot
+from ga_utils.ploting import plot_many, my_plot, problem_tag
 from ga_utils.draw_route import plot_route
 
 from collections import deque
@@ -16,14 +16,14 @@ class GeneticAlgorithmRapga:
 
     def __init__(self, initial_population: List[RouteUnit],*, maxpop, planned_epochs = 100, elite_size = None, mutation_rate = None):
 
-        self.cities = len(initial_population[0].route)
+        self.cities = initial_population[0].route
 
         self.population = initial_population
         self.min_size = 5
         self.max_size = maxpop
 
         self.elite_size = elite_size or 1
-        self.mutation_rate = mutation_rate or 1 / self.cities
+        self.mutation_rate = mutation_rate or 1 / len(self.cities)
 
         self.tag = "no_tag"
 
@@ -200,7 +200,7 @@ class GeneticAlgorithmRapga:
     def document(self):
         history = self.history
 
-        folder = f"plots/cities_{self.cities}_dim{len(self.population[0].route[0].coordinates)}" \
+        folder = f"plots/{problem_tag(self.cities)}" \
                  f"/{self.tag}/{self.max_size}_{self.elite_size}_{self.mutation_rate} --- {self.max:.3f}"
         print(folder, self.epoch)
         try:
@@ -216,7 +216,7 @@ class GeneticAlgorithmRapga:
         my_plot([e.sel_pressure for e in history], "Selective Pressure", folder)
         my_plot([e.popsize for e in history], "Population Size", folder)
 
-        plot_route([self.population[0].route], save_to=os.path.join(folder, "best_route.png"))
+        plot_route([self.population[0]], save_to= ( folder, "best_route.png") )
 
 
 

@@ -1,6 +1,6 @@
 from GeneticAlgorithm_RAPGA import GeneticAlgorithmRapga
 
-from siman.launch_sa import annealed_solution
+from classical.sim_anneal import annealed_solution
 
 
 from collections import namedtuple
