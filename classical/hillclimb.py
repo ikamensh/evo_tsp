@@ -1,5 +1,5 @@
 from RouteUnit import RouteUnit
-from siman.visualize_sa import plotTSP
+from siman.visualize_sa import plot_route
 
 from City import cities
 
@@ -34,7 +34,7 @@ done = False
 while not done:
     route, done = hill_climb(route)
 
-plotTSP([route.route], save_to=f"hill_climb_{route.distance():.4f}.png")
+plot_route([route.route], save_to=f"hill_climb_{route.distance():.4f}.png")
 
 
 

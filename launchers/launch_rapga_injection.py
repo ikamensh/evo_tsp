@@ -1,18 +1,39 @@
 from City import cities
 from GeneticAlgorithm_RAPGA import GeneticAlgorithmRapga
 import matplotlib.pyplot as plt
-import random
 import os
 
 from siman.visualize_sa import plot_route
+
+from siman.launch_sa import annealed_solution
 
 
 from collections import namedtuple
 episode = namedtuple("episode", "generation min avg max similarity longest_common sel_pressure popsize")
 
 
+def my_plot(array, name, folder):
+    plt.clf()
+    plt.plot(array)
+    plt.ylabel(name)
+    plt.xlabel('Generation')
+    plt.grid()
+    plt.savefig(os.path.join(folder, name+".png"))
+
+def plot_many(name, folder, *args):
+    plt.clf()
+    for array in args:
+        plt.plot(array)
+    plt.ylabel(name)
+    plt.xlabel('Generation')
+    plt.grid()
+    plt.savefig(os.path.join(folder, name + ".png"))
+
+
 def one_run(popsize, epochs, elite_size, mutation_rate):
     ga = GeneticAlgorithmRapga.with_random_population(popsize, cities, planned_epochs=epochs)
+    max_injections = 20
+    injections = 0
 
     history = []
     try:
@@ -22,10 +43,16 @@ def one_run(popsize, epochs, elite_size, mutation_rate):
                 print(i, ga.min, ga.avg, ga.max, ga.ra_percentage_common, len(ga.population))
             history.append(episode(i, ga.min, ga.avg, ga.max, ga.ra_percentage_common, ga.ra_longest_subseq, ga.ra_offspr_selection_tries, len(ga.population)))
             ga.step(elite_size, mutation_rate)
+
+            if injections < max_injections and ga.ra_offspr_selection_tries > ga.max_tries / 4:
+                ga.population.append( annealed_solution() )
+                ga.rank()
+                injections += 1
+
     except StopIteration:
         print("Terminated due to maximum selective pressure")
 
-    folder = f"plots/RAPGA/cities_{len(cities)}_dim{len(cities[0].coordinates)}/{popsize}_{elite_size}_{mutation_rate} --- {ga.max:.3f}"
+    folder = f"plots/RAPGA_No_elite/cities_{len(cities)}_dim{len(cities[0].coordinates)}/{popsize}_{elite_size}_{mutation_rate} --- {ga.max:.3f}"
     print(folder, epochs)
     try:
         os.makedirs(folder)
@@ -34,61 +61,32 @@ def one_run(popsize, epochs, elite_size, mutation_rate):
 
     avg = [e.avg for e in history]
     maxi = [e.max for e in history]
-    # mini = [e.min for e in history]
-    plt.clf()
-    # plt.plot(mini, color="green")
-    plt.plot(avg, color="blue")
-    plt.plot(maxi, color="black")
-    plt.ylabel('Distance')
-    plt.xlabel('Generation')
-    plt.grid()
-    plt.savefig(os.path.join(folder, "distances.png"))
+    plot_many("Distance", folder, avg, maxi)
 
-    similarity = [e.similarity for e in history]
-    plt.clf()
-    plt.plot(similarity)
-    plt.ylabel('Similarity')
-    plt.xlabel('Generation')
-    plt.grid()
-    plt.savefig(os.path.join(folder, "similarity.png"))
+    # plt.clf()
+    # plt.plot(avg, color="blue")
+    # plt.plot(maxi, color="black")
+    # plt.ylabel('Distance')
+    # plt.xlabel('Generation')
+    # plt.grid()
+    # plt.savefig(os.path.join(folder, "distances.png"))
 
-    sel_pressure = [e.sel_pressure for e in history]
-    plt.clf()
-    plt.plot(sel_pressure)
-    plt.ylabel('Selective Pressure')
-    plt.xlabel('Generation')
-    plt.grid()
-    plt.savefig(os.path.join(folder, "sel_pressure.png"))
-
-    popsize = [e.popsize for e in history]
-    plt.clf()
-    plt.plot(popsize)
-    plt.ylabel('Population size')
-    plt.xlabel('Generation')
-    plt.grid()
-    plt.savefig(os.path.join(folder, "popsize.png"))
+    my_plot([e.similarity for e in history], "similarity", folder)
+    my_plot([e.sel_pressure for e in history], "Selective Pressure", folder)
+    my_plot([e.popsize for e in history], "Population Size", folder)
 
     plot_route([ga.population[0].route], save_to=os.path.join(folder, "best_route.png"))
 
     return ga.population[0]
 
-    # lc = [e.longest_common for e in history]
-    #
-    # plt.clf()
-    # plt.plot(lc, color="green")
-    # plt.ylabel('Longest Subseq')
-    # plt.xlabel('Generation')
-    # plt.grid()
-    # plt.savefig(os.path.join(folder, "longest_common.png"))
 
-from cProfile import Profile
 
 
 from cProfile import Profile
 profiler = Profile()
-profiler.runcall(one_run, popsize=1000,
+profiler.runcall(one_run, popsize=50,
                 epochs=int( 2000 ),
-                elite_size=2,
+                elite_size=1,
                 mutation_rate= 8e-3)
 
 profiler.print_stats('cumulative')

@@ -1,6 +1,6 @@
 import math
 import random
-from siman.visualize_sa import plotTSP
+from siman.visualize_sa import plot_route
 import matplotlib.pyplot as plt
 from typing import List
 from City import City
@@ -84,8 +84,8 @@ class SimAnneal:
             self.accept(candidate)
             self.T *= self.alpha
             self.iteration += 1
-            if self.iteration % 5000 == 0:
-                print(self.iteration)
+            # if self.iteration % 5000 == 0:
+            #     print(self.iteration)
 
             self.fitness_list.append(self.cur_fitness)
 
@@ -97,7 +97,7 @@ class SimAnneal:
         """
         Visualize the TSP route with matplotlib
         """
-        plotTSP([self.best_solution])
+        plot_route([self.best_solution])
 
     def plot_learning(self):
         """

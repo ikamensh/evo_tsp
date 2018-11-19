@@ -1,19 +1,24 @@
 import random
 from RouteUnit import RouteUnit
+from City import City
 import numpy as np
 from typing import List
 
 from collections import deque
 
+from collections import namedtuple
+episode = namedtuple("episode", "generation min avg max similarity longest_common sel_pressure popsize")
+
 class GeneticAlgorithmRapga:
 
-    def __init__(self, popsize, city_list, planned_epochs = 100):
-        self.population: List[RouteUnit] = []
-        for i in range(popsize):
-            self.population.append(RouteUnit.createRoute(city_list))
+    def __init__(self, initial_population: List[RouteUnit], planned_epochs = 100, elite_size = None, mutation_rate = None):
 
-        self.min_size = 2
-        self.max_size = popsize * 2
+        self.population = initial_population
+        self.min_size = 5
+        self.max_size = len(initial_population)
+
+        self.elite_size = elite_size or 1
+        self.mutation_rate = mutation_rate or 2 / len(self.population[0].route)
 
 
         self.max = None
@@ -28,9 +33,9 @@ class GeneticAlgorithmRapga:
         self.planned_epochs = planned_epochs
         self.epoch = 0
 
-        self.max_tries = 500 # maximum generations for search for successful offsprings - per epoch
-        self.min_success_ratio = 0.3
-        self.max_success_ratio = 0.8
+        self.max_tries = int(2000 * (self.min_size / self.max_size)) # maximum generations for search for successful offsprings - per epoch
+        # self.min_success_ratio = 0.3
+        # self.max_success_ratio = 0.8
 
         self.min_selective_pressure = 0.5
         self.max_selective_pressure = 0.95
@@ -38,12 +43,23 @@ class GeneticAlgorithmRapga:
 
         self.tries_history = deque([1],maxlen=25)
 
+        self.history = []
+
+    @staticmethod
+    def with_random_population(popsize: int, city_list: List[City], planned_epochs: int,
+                               elite_size: int = None, mutation_rate: float = None):
+        population = []
+        for i in range(popsize):
+            population.append(RouteUnit.createRoute(city_list))
+        return GeneticAlgorithmRapga(population, planned_epochs, elite_size, mutation_rate)
+
 
     # success ratio is the portion of population which must be filled with successful offspring
-    @property
-    def success_ratio(self):
-        ratio = self.epoch / self.planned_epochs
-        return ratio*self.max_success_ratio + (1-ratio)*self.min_success_ratio
+    # @property
+    # def success_ratio(self):
+    #     ratio = self.epoch / self.planned_epochs
+    #     return ratio*self.max_success_ratio + (1-ratio)*self.min_success_ratio
+
 
     # selective pressure is a coefficient that determines whom of the parents must the child exceed
     #  - the better or the worse
@@ -69,21 +85,21 @@ class GeneticAlgorithmRapga:
 
         return parents
 
-    def breed_os(self, n, *, mutation_rate, smoothen_chances = 0.8) -> List[RouteUnit]:
+    def breed_os(self, n, *, elite, mutation_rate, smoothen_chances = 0.8) -> List[RouteUnit]:
         """
         Breed new generation with Offspring selection.
 
         we try to fill the self.success_ratio proportion of the population with only children who are better when their parents.
         """
 
-        successful = set()
+        successful = set(elite)
 
         n_tries = 0
 
         while len(successful) < self.max_size and n_tries < self.max_tries:
             n_tries += 1
             if n_tries > self.max_tries:
-                raise StopIteration
+                break
 
             parents = self.select_parents(n, smoothen_chances)
 
@@ -118,13 +134,28 @@ class GeneticAlgorithmRapga:
     def step(self, eliteSize, mutationRate):
 
         elite = self.population[:eliteSize]
-        new_generation = self.breed_os(self.max_size, mutation_rate=mutationRate)
+        new_generation = self.breed_os(self.max_size, elite=elite, mutation_rate=mutationRate)
 
-        self.population = elite + new_generation
+        self.population = new_generation
         self.rank()
         self.diverstity_stats()
 
         self.epoch += 1
+
+
+    def run(self):
+
+        try:
+            for i in range(self.planned_epochs):
+                if i % 30 == 0:
+                    print("generation", i)
+                    print(i, self.min, self.avg, self.max, self.ra_percentage_common, len(self.population))
+                self.history.append(episode(i, self.min, self.avg, self.max, self.ra_percentage_common, self.ra_longest_subseq,
+                                            self.ra_offspr_selection_tries, len(self.population)))
+                self.step(self.elite_size, self.mutation_rate)
+        except StopIteration:
+            print("Terminated due to maximum selective pressure")
+
 
 
     @property

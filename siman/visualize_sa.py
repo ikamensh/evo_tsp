@@ -3,7 +3,7 @@ from City import City
 from typing import List
 
 
-def plotTSP(paths: List[List[City]], num_iters=1, save_to=None):
+def plot_route(paths: List[List[City]], num_iters=1, save_to=None):
 
     """
     path: List of lists with the different orders in which the nodes are visited

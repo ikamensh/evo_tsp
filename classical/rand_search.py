@@ -1,7 +1,7 @@
 import time
 import random
 from RouteUnit import RouteUnit
-from siman.visualize_sa import plotTSP
+from siman.visualize_sa import plot_route
 
 from City import cities
 
@@ -27,7 +27,7 @@ def random_search(cities, epochs):
 best = random_search(cities, epochs=50000)
 print(best.distance())
 
-plotTSP([best.route], save_to=f"300_random_search_{best.distance():.4f}.png")
+plot_route([best.route], save_to=f"300_random_search_{best.distance():.4f}.png")
 
 
 

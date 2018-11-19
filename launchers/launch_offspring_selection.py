@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import random
 import os
 
-from siman.visualize_sa import plotTSP
+from siman.visualize_sa import plot_route
 
 
 from collections import namedtuple
@@ -62,7 +62,7 @@ def one_run(popsize, epochs, elite_size, mutation_rate):
     plt.grid()
     plt.savefig(os.path.join(folder, "sel_pressure.png"))
 
-    plotTSP( [ga.population[0].route] , save_to=os.path.join(folder, "best_route.png"))
+    plot_route([ga.population[0].route], save_to=os.path.join(folder, "best_route.png"))
 
     return ga.population[0]
 
