@@ -1,6 +1,16 @@
 from GeneticAlgorithm_RAPGA import GeneticAlgorithmRapga
 import random
 import datetime
+from concurrent import futures
+import traceback
+
+
+def run_in_sep_process(ga: GeneticAlgorithmRapga):
+    for route in ga.population:
+        print(len(route.route))
+    ga.run()
+    ga.document()
+    return ga.population
 
 class Sasegasa:
 
@@ -28,13 +38,31 @@ class Sasegasa:
         return last_village
 
     def step(self):
-        for ga in self.villages:
-            ga.run()
-            ga.document()
-        pop = []
-        for ga in self.villages:
-            pop += ga.population
-        self.redistribute(pop)
+
+
+        # for ga in self.villages:
+        #     ga.run()
+        #     ga.document()
+
+        population = []
+
+        with futures.ProcessPoolExecutor(2) as executor:
+
+            to_do = []
+            for ga in self.villages:
+                future = executor.submit(run_in_sep_process, ga)
+                to_do.append(future)
+
+            for future in futures.as_completed(to_do):
+
+                try:
+                    population.extend(future.result())
+                except:
+                    traceback.print_exc()
+
+
+
+        self.redistribute(population)
         self.set_tags()
 
     def redistribute(self, _population):
@@ -43,7 +71,7 @@ class Sasegasa:
         self.n_villages -= 1
         random.shuffle(population)
 
-        size = len(population)
+        size = len(population) // self.n_villages
 
         populations = [population[i*size : i*size + size] for i in range(self.n_villages)]
         homeless = population[size*self.n_villages:]
