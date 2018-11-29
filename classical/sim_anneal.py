@@ -1,5 +1,5 @@
 from RouteUnit import RouteUnit
-from siman.simulated_annealing import SimAnneal
+from classical.simulated_annealing import SimAnneal
 
 
 def annealed_solution(cities, time_limit) -> RouteUnit:

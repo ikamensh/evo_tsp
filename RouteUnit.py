@@ -17,7 +17,7 @@ class RouteUnit:
 
 
     @staticmethod
-    def route_distance(route):
+    def route_distance(route: List[City]):
         pathDistance = 0
         for i in range(0, len(route)):
             fromCity = route[i]
@@ -31,20 +31,19 @@ class RouteUnit:
     @property
     def fitness(self):
         if self._fitness == 0:
-            self._fitness = 1 / float(self.distance())
+            self._fitness = 1 / float(self.distance() + 1)
         return self._fitness
 
-    @staticmethod
-    def crossover(parent1: RouteUnit, parent2: RouteUnit) -> RouteUnit:
+    def crossover(self: RouteUnit, parent2: RouteUnit) -> RouteUnit:
         """
         Create a child which will have a random subsequence from parent1,
         and the rest of the sequence from parent2. The sequence from parent2 will have the
-        :param parent1:
+        :param self:
         :param parent2:
         :return:
         """
 
-        routeA = parent1.route
+        routeA = self.route
         routeB = parent2.route
 
         geneA = int(random.random() * len(routeA))
@@ -61,10 +60,10 @@ class RouteUnit:
         return RouteUnit(child)
 
     def mutate(self, mutationRate):
-
-        # if random.random() < 0.5:
-        #     self.mutate_2()
-        # else:
+        self._distance = None
+        if random.random() < 0.5:
+            self._mutate_2()
+        else:
             for swapped in range(len(self.route)):
                 if random.random() < mutationRate:
                     swapWith = int(random.random() * len(self.route))
@@ -75,13 +74,13 @@ class RouteUnit:
                     self.route[swapped] = city2
                     self.route[swapWith] = city1
 
-    def mutate_2(self):
+    def _mutate_2(self):
         length = random.randint(2, len(self.route) - 1)
         index = random.randint(0, len(self.route) - length)
         self.route[index:(index + length)] = reversed(self.route[index:(index + length)])
 
     @staticmethod
-    def createRoute(cityList: List[City]) -> RouteUnit:
+    def create_route(cityList: List[City]) -> RouteUnit:
         route = list(cityList)
         random.shuffle(route)
         return RouteUnit(route)
@@ -92,15 +91,19 @@ class RouteUnit:
     def percent_common(route1: RouteUnit, route2: RouteUnit):
         r1 = route1.route
         r2 = route2.route
-
         assert len(r1) == len(r2)
+        return RouteUnit.percent_common_route(r1, r2)
 
-        moves_1 = { (r1[i], r1[i+1]) for i in range(len(r1)-1)}
-        moves_1.add( (r1[-1], r1[0]) )
-        moves_2 = { (r2[i], r2[i+1]) for i in range(len(r2)-1)}
+
+    @staticmethod
+    def percent_common_route(r1: List[City], r2: List[City]):
+
+        moves_1 = {(r1[i], r1[i + 1]) for i in range(len(r1) - 1)}
+        moves_1.add((r1[-1], r1[0]))
+        moves_2 = {(r2[i], r2[i + 1]) for i in range(len(r2) - 1)}
         moves_2.add((r2[-1], r2[0]))
 
-        return len( moves_1.intersection(moves_2) ) / len(moves_1)
+        return 2 * len(moves_1.intersection(moves_2)) / (len(moves_1) + len(moves_2) )
 
     @staticmethod
     def longest_common_sequence(route1: RouteUnit, route2: RouteUnit):

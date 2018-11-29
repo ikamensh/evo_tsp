@@ -25,7 +25,7 @@ def run_hillclimb(cities, time_limit) -> RouteUnit:
     t = time.time()
 
     done = False
-    route = RouteUnit.createRoute(cities)
+    route = RouteUnit.create_route(cities)
 
     while time.time() - t > time_limit and not done:
         route, done = _hill_climb(route)

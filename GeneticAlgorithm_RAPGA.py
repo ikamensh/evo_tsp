@@ -57,7 +57,7 @@ class GeneticAlgorithmRapga:
                                elite_size: int = None, mutation_rate: float = None):
         population = []
         for i in range(popsize):
-            population.append(RouteUnit.createRoute(city_list))
+            population.append(RouteUnit.create_route(city_list))
         return GeneticAlgorithmRapga(population, maxpop=len(population), planned_epochs=planned_epochs,
                                      elite_size=elite_size, mutation_rate=mutation_rate)
 

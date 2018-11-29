@@ -22,5 +22,5 @@ class City:
         return hash(self.uid)
 
     def __repr__(self):
-        return  f"City at {str(self.coordinates)}"
+        return  f"City {self.uid}"
 

@@ -10,7 +10,7 @@ class GeneticAlgorithm:
     def __init__(self, popsize, city_list, planned_epochs = 100):
         self.population: List[RouteUnit] = []
         for i in range(popsize):
-            self.population.append(RouteUnit.createRoute(city_list))
+            self.population.append(RouteUnit.create_route(city_list))
         self.max = None
         self.min = None
         self.avg = None
