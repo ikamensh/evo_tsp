@@ -11,9 +11,9 @@ class Segment:
     cities: List[City] = field(repr=False)
     dominance: float = field(default_factory= lambda : 1 + random.random())
 
-    def __post_init__(self):
-        if len(self.from_to) == 0:
-            raise Exception("Empty segments are not allowed.")
+    # def __post_init__(self):
+    #     if len(self.from_to) == 0:
+    #         raise Exception("Empty segments are not allowed.")
 
     @staticmethod
     def from_list( lst : List[City], all_cities : List[City]):

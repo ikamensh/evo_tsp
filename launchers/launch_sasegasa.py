@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
     t = time()
 
-    sgs = Sasegasa(cities, n_villages=3, size_per_village=50, epochs_per_step=2)
+    sgs = Sasegasa(cities, n_villages=5, size_per_village=50, epochs_per_step=20)
     sgs.run()
 
     print("It took that many seconds: ",time() - t)

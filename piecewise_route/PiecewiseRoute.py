@@ -75,7 +75,7 @@ class PiecewiseRoute(AbstractRoute):
         not_visited = set(self.all_cities)
         not_visited.remove(first)
 
-        for _ in range(len(seq)-1):
+        for _ in range(len(self.all_cities)-1):
             try:
                 next_city = seq[route[-1]]
                 if next_city not in not_visited:

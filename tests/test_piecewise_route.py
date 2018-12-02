@@ -2,30 +2,6 @@ from piecewise_route.PiecewiseRoute import PiecewiseRoute
 from piecewise_route.Segment import Segment
 
 
-def test_missing_penalty(cities):
-    for i in range(100):
-        pwr = PiecewiseRoute.create_route(cities)
-
-        fitness_before = pwr.fitness
-
-        pwr.segments = [pwr.segments[0]]
-        pwr._fitness = None
-
-        assert fitness_before > pwr.fitness
-
-def test_extremely_short(cities):
-    pwr = PiecewiseRoute.create_route(cities)
-
-    fitness_before = pwr.fitness
-
-    pwr.segments = [pwr.segments[0]]
-    pwr.segments[0].from_to = {k:v for k,v in pwr.segments[0].from_to.items() if k is list(pwr.segments[0].from_to.keys())[0]}
-    pwr._fitness = None
-    fitness_after = pwr.fitness
-
-    assert fitness_before > fitness_after
-
-
 def test_cyclic_dicts(cities):
     pwr = PiecewiseRoute.create_route(cities)
     dicts = [seg.from_to for seg in pwr.segments]
@@ -70,37 +46,45 @@ def test_construction(cities):
         ind = route.index(c)
         # No ValueError expected - all cities present
 
-def test_missing_cities_low_fit(cities):
-
-    s1 = Segment.from_list(cities, cities)
-    s2 = Segment.from_list(cities[:len(cities)//2], cities)
-
-    pwr1 = PiecewiseRoute([s1], cities)
-    pwr2 = PiecewiseRoute([s2], cities)
-
-    assert pwr1.fitness >= pwr2.fitness
-
 
 def test_route(cities):
-    c1, c2, c3, c4 = cities[:4]
-    seg1 = Segment({c1: c2, c2: c3, c3: c4}, cities)
-    route = PiecewiseRoute([seg1], cities).to_route()
+    subcities = cities[:4]
+    c1, c2, c3, c4 = subcities
+    seg1 = Segment({c1: c2, c2: c3, c3: c4}, subcities)
+    route = PiecewiseRoute([seg1], subcities).to_route()
 
     assert route == [c1,c2,c3,c4]
 
-    seg2 = Segment({c3: c2, c2: c1, c1: c4}, cities)
-    route = PiecewiseRoute([seg2], cities).to_route()
+    seg2 = Segment({c3: c2, c2: c1, c1: c4}, subcities)
+    route = PiecewiseRoute([seg2], subcities).to_route()
 
     assert route == [c3, c2, c1, c4]
 
 
 def test_dominance(cities):
 
-    c1, c2, c3, c4 = cities[:4]
+    subcities = cities[:4]
+    c1, c2, c3, c4 = subcities
 
-    seg1 = Segment({c1:c2, c2:c3, c3:c4}, cities, dominance=1)
-    seg2 = Segment({c2:c4, c4:c3}, cities, dominance=2)
+    seg1 = Segment({c1:c2, c2:c3, c3:c4}, subcities, dominance=1)
+    seg2 = Segment({c2:c4, c4:c3}, subcities, dominance=2)
 
-    route = PiecewiseRoute([seg1, seg2], cities).to_route()
+    route = PiecewiseRoute([seg1, seg2], subcities).to_route()
 
     assert route == [c1, c2, c4, c3]
+
+
+def test_souvereinity(cities):
+    pwr1 = PiecewiseRoute.create_route(cities)
+    pwr2 = PiecewiseRoute.create_route(cities)
+
+    d1, d2 = pwr1.distance(), pwr2.distance()
+
+    children = [pwr1.crossover(pwr2) for i in range(10)]
+    for c in children:
+        c.mutate(0.5)
+
+    assert pwr1.distance() == d1
+    assert pwr2.distance() == d2
+
+

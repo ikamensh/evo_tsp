@@ -86,17 +86,17 @@ class GeneticAlgorithm:
     def run(self, epochs, elite_size, mutation_rate):
 
         for i in range(epochs):
-            # if i % 30 == 0:
-            print("generation", i)
-            print(i, self.min, self.avg, self.max, self.ra_percentage_common)
+            if i % 10 == 0:
+                print("generation", i)
+                print(i, self.min, self.avg, self.max, self.ra_percentage_common)
 
-            best_not_visited = self.population[0].cities_not_visited()
-            worst_not_visited = self.population[-1].cities_not_visited()
-            print(best_not_visited, worst_not_visited)
-
-            best_fitness = self.population[0].fitness
-            worst_fitness = self.population[-1].fitness
-            print(best_fitness, worst_fitness)
+            # best_not_visited = self.population[0].cities_not_visited()
+            # worst_not_visited = self.population[-1].cities_not_visited()
+            # print(best_not_visited, worst_not_visited)
+            #
+            # best_fitness = self.population[0].fitness
+            # worst_fitness = self.population[-1].fitness
+            # print(best_fitness, worst_fitness)
 
 
             self.history.append(episode(i, self.min, self.avg, self.max, self.ra_percentage_common))
