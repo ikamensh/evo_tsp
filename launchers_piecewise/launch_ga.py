@@ -19,7 +19,7 @@ def one_run(popsize, epochs, elite_size, mutation_rate):
 from cProfile import Profile
 profiler = Profile()
 profiler.runcall(one_run, popsize=50,
-                epochs=int( 50 ),
+                epochs=int( 250 ),
                 elite_size=1,
                 mutation_rate= 0.1)
 

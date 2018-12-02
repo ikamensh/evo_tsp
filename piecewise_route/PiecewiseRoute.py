@@ -17,7 +17,12 @@ class PiecewiseRoute(AbstractRoute):
     def __init__(self, segments: List[Segment], all_cities: List[City]):
         if len(segments) == 0:
             raise Exception("Empty routes are not allowed.")
-        self.segments = segments
+        new_segments = []
+        if segments:
+            for seg in segments:
+                new_segments.append(Segment(dict(seg.from_to), all_cities))
+        self.segments = new_segments
+
         self.all_cities = all_cities
         self._fitness = None
         self.n_segments_reg_threshold = min( int( 4 * math.sqrt(len(all_cities)) ), len(all_cities) // 2)
@@ -67,12 +72,20 @@ class PiecewiseRoute(AbstractRoute):
         first = list(seq.keys())[0]
         route = [first]
 
-        try:
-            for _ in range(len(seq)):
-                route.append(seq[route[-1]])
-        except KeyError:
-            # print("Key error on city:", e)
-            pass
+        not_visited = set(self.all_cities)
+        not_visited.remove(first)
+
+        for _ in range(len(seq)-1):
+            try:
+                next_city = seq[route[-1]]
+                if next_city not in not_visited:
+                    next_city = random.sample(not_visited, 1)[0]
+                route.append(next_city)
+                not_visited.remove(next_city)
+            except KeyError:
+                next_city = random.sample(not_visited, 1)[0]
+                route.append(next_city)
+                not_visited.remove(next_city)
 
         if route[0] == route[-1]:
             route.pop()
@@ -124,7 +137,7 @@ class PiecewiseRoute(AbstractRoute):
 
 
         new_route = PiecewiseRoute(start + end, self.all_cities)
-        return copy.deepcopy(new_route)
+        return new_route
 
     def _segments_crossover(self, other: PiecewiseRoute) -> PiecewiseRoute:
 
@@ -137,7 +150,7 @@ class PiecewiseRoute(AbstractRoute):
             else:
                 new_segments.append(seg)    # Imbalance: most pieces come from parent1
 
-        return copy.deepcopy(PiecewiseRoute(new_segments, self.all_cities))
+        return PiecewiseRoute(new_segments, self.all_cities)
 
 
     def crossover(self, other: PiecewiseRoute) -> PiecewiseRoute:
