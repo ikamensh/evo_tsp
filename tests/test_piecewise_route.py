@@ -1,5 +1,5 @@
-from piecewise_route.PiecewiseRoute import PiecewiseRoute
-from piecewise_route.Segment import Segment
+from solutions.PiecewiseRoute import PiecewiseRoute
+from solutions.Segment import Segment
 
 
 def test_cyclic_dicts(cities):
@@ -38,7 +38,7 @@ def test_cyclic_dicts(cities):
 
 def test_construction(cities):
     pwr = PiecewiseRoute.create_route(cities)
-    route = pwr.to_route()
+    route = pwr.route()
 
     assert len(pwr.segments) > 1
     assert len(route) == len(cities)
@@ -51,12 +51,12 @@ def test_route(cities):
     subcities = cities[:4]
     c1, c2, c3, c4 = subcities
     seg1 = Segment({c1: c2, c2: c3, c3: c4}, subcities)
-    route = PiecewiseRoute([seg1], subcities).to_route()
+    route = PiecewiseRoute([seg1], subcities).route()
 
     assert route == [c1,c2,c3,c4]
 
     seg2 = Segment({c3: c2, c2: c1, c1: c4}, subcities)
-    route = PiecewiseRoute([seg2], subcities).to_route()
+    route = PiecewiseRoute([seg2], subcities).route()
 
     assert route == [c3, c2, c1, c4]
 
@@ -69,7 +69,7 @@ def test_dominance(cities):
     seg1 = Segment({c1:c2, c2:c3, c3:c4}, subcities, dominance=1)
     seg2 = Segment({c2:c4, c4:c3}, subcities, dominance=2)
 
-    route = PiecewiseRoute([seg1, seg2], subcities).to_route()
+    route = PiecewiseRoute([seg1, seg2], subcities).route()
 
     assert route == [c1, c2, c4, c3]
 
@@ -78,13 +78,32 @@ def test_souvereinity(cities):
     pwr1 = PiecewiseRoute.create_route(cities)
     pwr2 = PiecewiseRoute.create_route(cities)
 
-    d1, d2 = pwr1.distance(), pwr2.distance()
+    d1, d2 = pwr1.distance, pwr2.distance
 
     children = [pwr1.crossover(pwr2) for i in range(10)]
     for c in children:
         c.mutate(0.5)
 
-    assert pwr1.distance() == d1
-    assert pwr2.distance() == d2
+    assert pwr1.distance == d1
+    assert pwr2.distance == d2
 
 
+def test_distance_fitness_same_rank(cities):
+
+    n_routes = 500
+
+    routes = [PiecewiseRoute.create_route(cities) for i in range(n_routes)]
+    routes2 = list(routes)
+
+    routes.sort(key=lambda x: x.fitness)
+    routes2.sort(key=lambda x: x.distance, reverse=True)
+
+    for i in range(n_routes):
+        assert routes[i] is routes2[i]
+
+
+def test_deterministic_distance(cities):
+    pwr1 = PiecewiseRoute.create_route(cities)
+
+    measurements = {pwr1.distance for i in range(500)}
+    assert len(measurements) == 1

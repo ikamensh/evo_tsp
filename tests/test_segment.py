@@ -1,4 +1,4 @@
-from piecewise_route.Segment import Segment
+from solutions.Segment import Segment
 from pytest import fixture
 
 @fixture()

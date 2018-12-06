@@ -1,39 +1,39 @@
 from __future__ import annotations
-from piecewise_route.Segment import Segment
-from piecewise_route.AbstractRoute import AbstractRoute
+from solutions.Segment import Segment
+from solutions.AbstractRoute import AbstractRoute
 from City import City
-from RouteUnit import RouteUnit
-from typing import List
+from solutions.RouteUnit import RouteUnit
+from typing import List, Dict, Any
 import random
 import math
 
 N_SEGMENTS_REGULARIZATION = 1e-4
 SEG_LENGTH_REGULARIZATION = 1e-7
 
-import copy
 
 class PiecewiseRoute(AbstractRoute):
 
     def __init__(self, segments: List[Segment], all_cities: List[City]):
-        if len(segments) == 0:
-            raise Exception("Empty routes are not allowed.")
+
         new_segments = []
-        if segments:
-            for seg in segments:
-                new_segments.append(Segment(dict(seg.from_to), all_cities))
+        for seg in segments:
+            new_segments.append(Segment(dict(seg.from_to), all_cities))
         self.segments = new_segments
 
         self.all_cities = all_cities
         self._fitness = None
+        self._route = None
         self.n_segments_reg_threshold = min( int( 4 * math.sqrt(len(all_cities)) ), len(all_cities) // 2)
         self.n_transitions_reg_threshold = len(all_cities) * 10
 
 
     @staticmethod
-    def create_route(_city_list: List[City]) -> PiecewiseRoute:
+    def create_route(_city_list: List[City], shuffle = True) -> PiecewiseRoute:
 
         city_list = list(_city_list)
-        random.shuffle(city_list)
+        if shuffle:
+            random.shuffle(city_list)
+
         city_list.append(city_list[0])
         n_segments_max = min( int( 2 * math.sqrt(len(city_list)) ), len(city_list) // 2)
         n_segments = random.randint(2, n_segments_max)
@@ -55,56 +55,65 @@ class PiecewiseRoute(AbstractRoute):
 
         return PiecewiseRoute(segments, _city_list)
 
+    @property
+    def route(self) -> List[City]:
+        if self._route is None:
+            if len(self.segments) == 0:
+                return []
 
-    def to_route(self) -> List[City]:
-        if len(self.segments) == 0:
-            return []
-
-        seq = {}
-        sorted_segments = sorted(self.segments, key= lambda x: x.dominance)
-        for segment in sorted_segments:
-            seq.update(segment.from_to)
-            for k, v in segment.from_to.items():
-                if (v, k) in seq.items():
-                    del seq[v]
+            seq = {}
+            sorted_segments = sorted(self.segments, key= lambda x: x.dominance)
+            for segment in sorted_segments:
+                seq.update(segment.from_to)
+                for k, v in segment.from_to.items():
+                    if (v, k) in seq.items():
+                        del seq[v]
 
 
-        first = list(seq.keys())[0]
-        route = [first]
+            first = list(seq.keys())[0]
+            route = [first]
 
-        not_visited = set(self.all_cities)
-        not_visited.remove(first)
+            not_visited = set(self.all_cities)
+            not_visited.remove(first)
 
-        for _ in range(len(self.all_cities)-1):
-            try:
-                next_city = seq[route[-1]]
-                if next_city not in not_visited:
+            for _ in range(len(self.all_cities)-1):
+                try:
+                    next_city = seq[route[-1]]
+                    if next_city not in not_visited:
+                        next_city = random.sample(not_visited, 1)[0]
+                    route.append(next_city)
+                    not_visited.remove(next_city)
+                except KeyError:
                     next_city = random.sample(not_visited, 1)[0]
-                route.append(next_city)
-                not_visited.remove(next_city)
-            except KeyError:
-                next_city = random.sample(not_visited, 1)[0]
-                route.append(next_city)
-                not_visited.remove(next_city)
+                    route.append(next_city)
+                    not_visited.remove(next_city)
 
-        if route[0] == route[-1]:
-            route.pop()
+            if route[0] == route[-1]:
+                route.pop()
 
-        return route
+            self._route = route
+        return self._route
 
+    @property
     def distance(self):
-        route_unit = RouteUnit(self.to_route())
-        return route_unit.distance()
+        route_unit = RouteUnit(self.route)
+        return route_unit.distance
 
     def cities_not_visited(self):
-        route_unit = RouteUnit(self.to_route())
-        return len( set(self.all_cities) - set(route_unit.route) )
+        return len( set(self.all_cities) - set(self.route) )
 
+    @property
+    def n_segments(self):
+        return len(self.segments)
+
+    @property
+    def n_steps(self):
+        return sum([len(seg.from_to) for seg in self.segments])
 
     @property
     def fitness(self):
         if self._fitness is None:
-            route_unit = RouteUnit(self.to_route())
+            route_unit = RouteUnit(self.route)
 
             too_many_segments = max(0, len(self.segments) - self.n_segments_reg_threshold)
             penalty_n_routes = N_SEGMENTS_REGULARIZATION * too_many_segments
@@ -113,6 +122,7 @@ class PiecewiseRoute(AbstractRoute):
             penalty_segments_len = SEG_LENGTH_REGULARIZATION * too_many_steps
 
             self._fitness = route_unit.fitness - self.cities_not_visited() - penalty_n_routes - penalty_segments_len
+            assert self._fitness <= route_unit.fitness
 
         return self._fitness
 
@@ -121,6 +131,8 @@ class PiecewiseRoute(AbstractRoute):
         for mutating_segment in self.segments:
             mutating_segment.mutate(mutation_rate)
         self._fitness = None
+        self._route = None
+
 
     def _exchange_crossover(self, other: PiecewiseRoute) -> PiecewiseRoute:
 
@@ -158,6 +170,23 @@ class PiecewiseRoute(AbstractRoute):
             return self._segments_crossover(other)
         else:
             return self._exchange_crossover(other)
+
+
+    @staticmethod
+    def compute_stats(population: List[PiecewiseRoute]) -> Dict[str, Any]:
+
+        n_segments = [r.n_segments for r in population]
+        n_steps = [r.n_steps for r in population]
+        all_segments = [seg for r in population for seg in r.segments]
+        seg_lengths = [len(seg.from_to) for seg in all_segments]
+
+        return {
+            "n_segments" : n_segments,
+            "n_steps" : n_steps,
+            "seg_lengths" : seg_lengths
+
+        }
+
 
 
 

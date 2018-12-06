@@ -3,18 +3,30 @@ from typing import List, Dict
 from City import City
 import random
 from borrowed import longest_common_seq
+from solutions.AbstractRoute import AbstractRoute
 
-class RouteUnit:
+class RouteUnit(AbstractRoute):
     def __init__(self, route: List[City]):
-        self.route = list(route)
+        self._route = list(route)
         self._distance = None
         self._fitness = 0.0
 
+
+    @property
+    def route(self):
+        return self._route
+
+    @staticmethod
+    def create_route(cityList: List[City]) -> RouteUnit:
+        route = list(cityList)
+        random.shuffle(route)
+        return RouteUnit(route)
+
+    @property
     def distance(self):
         if self._distance is None:
             self._distance = self.route_distance(self.route)
         return self._distance
-
 
     @staticmethod
     def route_distance(route: List[City]):
@@ -31,7 +43,7 @@ class RouteUnit:
     @property
     def fitness(self):
         if self._fitness == 0:
-            self._fitness = 1 / float(self.distance() + 1)
+            self._fitness = 1 / float(self.distance + 1)
         return self._fitness
 
     def crossover(self: RouteUnit, parent2: RouteUnit) -> RouteUnit:
@@ -79,31 +91,6 @@ class RouteUnit:
         index = random.randint(0, len(self.route) - length)
         self.route[index:(index + length)] = reversed(self.route[index:(index + length)])
 
-    @staticmethod
-    def create_route(cityList: List[City]) -> RouteUnit:
-        route = list(cityList)
-        random.shuffle(route)
-        return RouteUnit(route)
-
-
-    # stats methods
-    @staticmethod
-    def percent_common(route1: RouteUnit, route2: RouteUnit):
-        r1 = route1.route
-        r2 = route2.route
-        assert len(r1) == len(r2)
-        return RouteUnit.percent_common_route(r1, r2)
-
-
-    @staticmethod
-    def percent_common_route(r1: List[City], r2: List[City]):
-
-        moves_1 = {(r1[i], r1[i + 1]) for i in range(len(r1) - 1)}
-        moves_1.add((r1[-1], r1[0]))
-        moves_2 = {(r2[i], r2[i + 1]) for i in range(len(r2) - 1)}
-        moves_2.add((r2[-1], r2[0]))
-
-        return 2 * len(moves_1.intersection(moves_2)) / (len(moves_1) + len(moves_2) )
 
     @staticmethod
     def longest_common_sequence(route1: RouteUnit, route2: RouteUnit):

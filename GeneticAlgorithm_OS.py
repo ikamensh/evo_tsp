@@ -1,5 +1,5 @@
 import random
-from RouteUnit import RouteUnit
+from solutions.RouteUnit import RouteUnit
 import numpy as np
 from typing import List
 

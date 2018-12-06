@@ -1,4 +1,4 @@
-from RouteUnit import RouteUnit
+from solutions.RouteUnit import RouteUnit
 from typing import Tuple
 
 def _hill_climb(route: RouteUnit) -> Tuple[RouteUnit, bool]:

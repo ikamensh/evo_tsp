@@ -1,5 +1,5 @@
 from time import time
-import RouteUnit
+from solutions import RouteUnit
 from ga_utils.draw_route import plot_route
 from ga_utils.ploting import problem_tag
 

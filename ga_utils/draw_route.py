@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
-from RouteUnit import RouteUnit
+from solutions.AbstractRoute import AbstractRoute
 from typing import List
 import os
 
 
-def plot_route(paths: List[RouteUnit], num_iters=1, save_to=None):
+def plot_route(paths: List[AbstractRoute], num_iters=1, save_to=None):
 
     """
     path: List of lists with the different orders in which the nodes are visited

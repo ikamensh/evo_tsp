@@ -1,6 +1,5 @@
-import time
 import random
-from RouteUnit import RouteUnit
+from solutions.RouteUnit import RouteUnit
 
 def _random_search(cities, epochs):
 

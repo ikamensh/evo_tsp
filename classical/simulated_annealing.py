@@ -3,7 +3,7 @@ import random
 import matplotlib.pyplot as plt
 from typing import List
 from City import City
-from RouteUnit import RouteUnit
+from solutions.RouteUnit import RouteUnit
 
 
 class SimAnneal:
