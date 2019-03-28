@@ -11,7 +11,7 @@ episode = namedtuple("episode", "generation min avg max similarity")
 from ga_utils.ploting import plot_many, my_plot, problem_tag, plot_histogram
 from ga_utils.draw_route import plot_route
 from ga_utils import stats
-import os
+
 
 class GeneticAlgorithm:
 
@@ -19,6 +19,7 @@ class GeneticAlgorithm:
         assert issubclass(route_cls, AbstractRoute)
         self.route_cls = route_cls
         self.city_list = city_list
+
         self.population: List[AbstractRoute] = []
         for i in range(popsize):
             self.population.append(route_cls.create_route(city_list))
@@ -34,11 +35,14 @@ class GeneticAlgorithm:
         self.hist_similarity = deque(maxlen=25)
         self.diverstity_stats()
 
-        self.tag = "standard " + str(random.randint(1000,10000))
+
+        import datetime
+        self.tag = f"{route_cls.__name__}_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
 
 
 
     def rank(self):
+
         self.population = sorted(self.population, key=lambda x: x.fitness, reverse=True)
         self.max = self.population[0].distance
         self.min = self.population[-1].distance

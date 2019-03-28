@@ -31,13 +31,9 @@ class RouteUnit(AbstractRoute):
     @staticmethod
     def route_distance(route: List[City]):
         pathDistance = 0
-        for i in range(0, len(route)):
-            fromCity = route[i]
-            if i + 1 < len(route):
-                toCity = route[i + 1]
-            else:
-                toCity = route[0]
-            pathDistance += fromCity.distance(toCity)
+        path = route + [route[0]]
+        for i in range(0, len(path)-1):
+            pathDistance += path[i].distance(path[i+1])
         return pathDistance
 
     @property
@@ -58,14 +54,15 @@ class RouteUnit(AbstractRoute):
         routeA = self.route
         routeB = parent2.route
 
-        geneA = int(random.random() * len(routeA))
-        geneB = int(random.random() * len(routeB))
+        geneA = random.randint(0, City.n_cities)
+        geneB = random.randint(0, City.n_cities)
 
         startGene = min(geneA, geneB)
         endGene = max(geneA, geneB)
 
         childP1 = routeA[startGene: endGene]
-        childP2 = [item for item in routeB if item not in childP1]
+        check = {city.uid for city in childP1}
+        childP2 = [item for item in routeB if item.uid not in check]
 
         child = childP1 + childP2
 
